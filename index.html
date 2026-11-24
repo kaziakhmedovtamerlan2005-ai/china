@@ -28,8 +28,6 @@
     max-width:1400px; margin:0 auto;
     -webkit-font-smoothing:antialiased;
   }
-
-  /* --- Buttons: 44px touch target --- */
   button{
     font-family:inherit; cursor:pointer; border:1px solid var(--border);
     background:var(--bg2); color:var(--text);
@@ -42,8 +40,6 @@
   button.primary:active{background:var(--accent2)}
   button.danger{color:var(--red)}
   button.danger:active{border-color:var(--red)}
-
-  /* --- Inputs: 16px to prevent iOS zoom --- */
   input, select, textarea{
     font-family:inherit; font-size:16px; background:var(--bg); color:var(--text);
     border:1px solid var(--border); border-radius:10px; padding:12px 14px; width:100%;
@@ -56,8 +52,6 @@
   }
   input:focus, select:focus, textarea:focus{outline:none; border-color:var(--accent)}
   label{font-size:13px; color:var(--muted); display:block; margin-bottom:6px; font-weight:500}
-
-  /* --- Topbar --- */
   .topbar{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px}
   .brand{display:flex; align-items:center; gap:10px; min-width:0}
   .logo{font-size:28px; flex-shrink:0}
@@ -66,8 +60,6 @@
   .actions{display:flex; gap:8px; flex-shrink:0}
   .actions button{padding:10px 14px; font-size:14px}
   #settingsBtn span{display:none}
-
-  /* --- Stats: horizontal scroll on mobile --- */
   .stats{
     display:flex; gap:10px; margin-bottom:16px;
     overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:4px;
@@ -84,16 +76,12 @@
   .stat .value{font-size:20px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap}
   .stat .value.green{color:var(--green)}
   .stat .value.red{color:var(--red)}
-
-  /* --- Toolbar --- */
   .toolbar{display:flex; flex-direction:column; gap:10px; margin-bottom:16px}
   .toolbar-row{display:flex; gap:8px}
   .toolbar-row input{flex:1}
   .toolbar-row select{flex:1; min-width:0}
   .toolbar-actions{display:flex; gap:8px}
   .toolbar-actions button{flex:1; font-size:14px}
-
-  /* --- Grid --- */
   .grid{display:grid; grid-template-columns:1fr; gap:12px}
   .card{
     background:var(--card); border:1px solid var(--border); border-radius:14px;
@@ -111,21 +99,17 @@
     align-items:center; justify-content:center;
   }
   .icon-btn:active{opacity:1; background:var(--bg2); transform:scale(.9)}
-
   .calc-row{display:flex; justify-content:space-between; font-size:13.5px; padding:3px 0; gap:12px}
   .calc-row .k{color:var(--muted); flex-shrink:0}
   .calc-row .v{font-variant-numeric:tabular-nums; text-align:right}
   .divider{border-top:1px dashed var(--border); margin:8px 0}
-
   .profit-block{background:var(--bg2); border-radius:12px; padding:14px; margin-top:4px}
   .profit-main{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; gap:12px}
   .profit-main .label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; font-weight:500}
   .profit-main .val{font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap}
   .profit-sub{display:flex; gap:16px; font-size:12.5px; color:var(--muted); flex-wrap:wrap}
   .profit-sub b{color:var(--text); font-weight:600}
-
   .pos{color:var(--green)} .neg{color:var(--red)} .warn{color:var(--yellow)}
-
   .card-links{display:flex; gap:8px; margin-top:4px}
   .card-links a{
     flex:1; text-align:center; padding:11px 8px; font-size:13px; color:var(--muted);
@@ -134,14 +118,11 @@
     transition:background .15s, border-color .15s, color .15s;
   }
   .card-links a:active{background:var(--bg2); color:var(--accent); border-color:var(--accent)}
-
   .empty{
     text-align:center; padding:60px 20px; color:var(--muted);
     border:1px dashed var(--border); border-radius:14px; font-size:15px;
   }
   .empty h3{color:var(--text); font-size:17px; margin-bottom:8px}
-
-  /* --- FAB (floating action button) --- */
   .fab{
     position:fixed; right:calc(20px + var(--safe-right));
     bottom:calc(20px + var(--safe-bottom));
@@ -152,10 +133,7 @@
     transition:transform .15s, box-shadow .15s;
   }
   .fab:active{transform:scale(.92); box-shadow:0 4px 12px rgba(79,140,255,.5)}
-  /* Hide top "add" button on mobile, FAB replaces it */
   #addBtn{display:none}
-
-  /* --- Modals as bottom sheets on mobile --- */
   .overlay{
     position:fixed; inset:0; background:rgba(0,0,0,.6);
     display:none; align-items:flex-end; justify-content:center;
@@ -186,8 +164,6 @@
   .modal-actions button{flex:1; padding:14px; font-size:15px}
   .modal-actions .cancel-group{display:flex; gap:10px}
   .hint{font-size:12px; color:var(--muted); margin-top:6px; line-height:1.4}
-
-  /* --- Toast: above FAB --- */
   .toast{
     position:fixed; left:50%; transform:translateX(-50%) translateY(20px);
     bottom:calc(96px + var(--safe-bottom));
@@ -199,13 +175,8 @@
   .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
   .toast.ok{border-color:var(--green)}
   .toast.err{border-color:var(--red)}
-
-  /* ============================================ */
-  /* --- TABLET & DESKTOP overrides ---          */
-  /* ============================================ */
   @media (min-width:640px){
-    body{padding: calc(24px + var(--safe-top)) calc(24px + var(--safe-right))
-                  calc(24px + var(--safe-bottom)) calc(24px + var(--safe-left))}
+    body{padding: calc(24px + var(--safe-top)) calc(24px + var(--safe-right)) calc(24px + var(--safe-bottom)) calc(24px + var(--safe-left))}
     .topbar{margin-bottom:24px}
     .brand h1{font-size:22px}
     .logo{font-size:32px}
@@ -213,20 +184,14 @@
     #addBtn{display:inline-flex}
     .fab{display:none}
     .grid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px}
-    .stats{
-      display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-      overflow:visible; margin-left:0; margin-right:0; padding-left:0; padding-right:0;
-    }
+    .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); overflow:visible; margin-left:0; margin-right:0; padding-left:0; padding-right:0;}
     .stat{min-width:0}
     .toolbar{flex-direction:row; align-items:center; flex-wrap:wrap}
     .toolbar-row{flex:1; min-width:0}
     .toolbar-actions{flex:0 0 auto}
     .toolbar-actions button{flex:0 0 auto}
     .overlay{align-items:center; padding:20px}
-    .modal{
-      border-radius:16px; padding:24px; max-width:520px;
-      animation:pop .2s ease;
-    }
+    .modal{border-radius:16px; padding:24px; max-width:520px; animation:pop .2s ease;}
     .modal::before{display:none}
     @keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
     .modal-actions{flex-direction:row; justify-content:flex-end}
@@ -240,8 +205,6 @@
     .card-links a:active{background:transparent; color:var(--muted); border-color:var(--border)}
     .fab:active{transform:none}
   }
-
-  /* Desktop hover only on hover-capable devices */
   @media (hover:hover) and (pointer:fine){
     button:hover{background:var(--card); border-color:#3d4454}
     button.primary:hover{background:var(--accent2)}
@@ -303,10 +266,8 @@
   <p>Нажмите «+», чтобы добавить первую связку 1688 → маркетплейс.</p>
 </div>
 
-<!-- FAB -->
 <button class="fab" id="fabAdd" aria-label="Добавить товар">+</button>
 
-<!-- Product modal -->
 <div class="overlay" id="productOverlay">
   <div class="modal">
     <h2 id="productModalTitle">Новый товар</h2>
@@ -356,7 +317,6 @@
   </div>
 </div>
 
-<!-- Settings modal -->
 <div class="overlay" id="settingsOverlay">
   <div class="modal">
     <h2>Настройки расчёта</h2>
@@ -398,6 +358,46 @@ const DEFAULT_SETTINGS = { rate: 11.8, commission: 19, acquiring: 1.5, logistics
 const LS_PRODUCTS = 'chinatrack_products_v1';
 const LS_SETTINGS = 'chinatrack_settings_v1';
 
+// Встроенные товары (появятся при первом запуске)
+const DEFAULT_PRODUCTS = [
+  {
+    id: "pb-01",
+    name: "Магнитный повербанк MagSafe 5000 мАч",
+    category: "Электроника / Аксессуары",
+    moq: 100,
+    priceCny: 34.80,
+    salePrice: 1590,
+    url1688: "https://detail.1688.com/offer/1102751417630.html",
+    urlMp: "https://www.ozon.ru/search/?text=Магнитный+повербанк+MagSafe+5000",
+    notes: "Ультратонкий. Магнитная фиксация. Требует сертификации ЕАЭС.",
+    createdAt: 1719000000000
+  },
+  {
+    id: "pb-02",
+    name: "Повербанк 10000 мАч с кабелями",
+    category: "Электроника / Аксессуары",
+    moq: 100,
+    priceCny: 49.00,
+    salePrice: 1890,
+    url1688: "https://yiwugo.com/product/detail/953474774.html",
+    urlMp: "https://www.ozon.ru/search/?text=Повербанк+со+встроенными+кабелями+10000",
+    notes: "Встроенные кабели Type-C и Lightning. LED-дисплей.",
+    createdAt: 1719000000001
+  },
+  {
+    id: "pb-03",
+    name: "Мини-повербанк 5000 мАч Type-C",
+    category: "Электроника / Аксессуары",
+    moq: 1000,
+    priceCny: 17.50,
+    salePrice: 1190,
+    url1688: "https://tbc.yiwugo.com/product/detail/953474774.html",
+    urlMp: "https://www.ozon.ru/search/?text=Мини+повербанк+5000+мАч+Type-C",
+    notes: "Размер с кредитку. Высокий спрос. Требует сертификации ЕАЭС.",
+    createdAt: 1719000000002
+  }
+];
+
 const state = { products: [], settings: { ...DEFAULT_SETTINGS }, search: '', category: 'all', sort: 'created' };
 
 const $ = id => document.getElementById(id);
@@ -430,11 +430,15 @@ function toast(msg, type = 'ok') {
 
 function load() {
   try {
-    const p = JSON.parse(localStorage.getItem(LS_PRODUCTS) || '[]');
+    const p = JSON.parse(localStorage.getItem(LS_PRODUCTS) || 'null');
     const s = JSON.parse(localStorage.getItem(LS_SETTINGS) || 'null');
-    state.products = Array.isArray(p) ? p : [];
+    // Если данных нет, загружаем встроенные (DEFAULT_PRODUCTS)
+    state.products = (Array.isArray(p) && p.length > 0) ? p : DEFAULT_PRODUCTS;
     state.settings = s ? { ...DEFAULT_SETTINGS, ...s } : { ...DEFAULT_SETTINGS };
-  } catch (e) { console.error(e); }
+  } catch (e) { 
+    console.error(e); 
+    state.products = DEFAULT_PRODUCTS;
+  }
 }
 
 function save() {
@@ -634,9 +638,9 @@ function resetData() {
   if (!confirm('Удалить ВСЕ товары и настройки?')) return;
   localStorage.removeItem(LS_PRODUCTS);
   localStorage.removeItem(LS_SETTINGS);
-  state.products = [];
+  state.products = DEFAULT_PRODUCTS; // Возвращаем дефолтные
   state.settings = { ...DEFAULT_SETTINGS };
-  closeModal('settings'); render(); toast('Очищено');
+  closeModal('settings'); render(); toast('Сброшено до базовых');
 }
 
 function exportJSON() {
@@ -684,7 +688,6 @@ document.querySelectorAll('.overlay').forEach(o => {
   o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
 });
 
-// Prevent iOS rubber-band on inputs
 document.addEventListener('touchmove', e => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') e.stopPropagation();
 }, { passive: true });
