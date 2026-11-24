@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>ChinaTrack</title>
+<style>
+  :root{
+    --bg:#0f1117; --bg2:#171a23; --card:#1c2029; --border:#2a2f3d;
+    --text:#e4e6eb; --muted:#8b92a7; --accent:#4f8cff; --accent2:#3b6fd4;
+    --green:#22c55e; --red:#ef4444; --yellow:#eab308;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{overscroll-behavior-y:none}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--text); min-height:100vh; line-height:1.5;
+    padding: calc(16px + var(--safe-top)) calc(16px + var(--safe-right))
+             calc(96px + var(--safe-bottom)) calc(16px + var(--safe-left));
+    max-width:1400px; margin:0 auto;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* --- Buttons: 44px touch target --- */
+  button{
+    font-family:inherit; cursor:pointer; border:1px solid var(--border);
+    background:var(--bg2); color:var(--text);
+    padding:10px 16px; border-radius:10px; font-size:15px; font-weight:500;
+    transition:transform .1s, background .15s, border-color .15s;
+    min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  }
+  button:active{transform:scale(.96); background:var(--card)}
+  button.primary{background:var(--accent); border-color:var(--accent); color:#fff}
+  button.primary:active{background:var(--accent2)}
+  button.danger{color:var(--red)}
+  button.danger:active{border-color:var(--red)}
+
+  /* --- Inputs: 16px to prevent iOS zoom --- */
+  input, select, textarea{
+    font-family:inherit; font-size:16px; background:var(--bg); color:var(--text);
+    border:1px solid var(--border); border-radius:10px; padding:12px 14px; width:100%;
+    min-height:44px; transition:border-color .15s;
+    -webkit-appearance:none; appearance:none;
+  }
+  select{
+    background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%238b92a7' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 14px center; padding-right:36px;
+  }
+  input:focus, select:focus, textarea:focus{outline:none; border-color:var(--accent)}
+  label{font-size:13px; color:var(--muted); display:block; margin-bottom:6px; font-weight:500}
+
+  /* --- Topbar --- */
+  .topbar{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px}
+  .brand{display:flex; align-items:center; gap:10px; min-width:0}
+  .logo{font-size:28px; flex-shrink:0}
+  .brand h1{font-size:20px; letter-spacing:-.02em; white-space:nowrap}
+  .brand p{font-size:12px; color:var(--muted)}
+  .actions{display:flex; gap:8px; flex-shrink:0}
+  .actions button{padding:10px 14px; font-size:14px}
+  #settingsBtn span{display:none}
+
+  /* --- Stats: horizontal scroll on mobile --- */
+  .stats{
+    display:flex; gap:10px; margin-bottom:16px;
+    overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:4px;
+    margin-left:calc(-1 * var(--safe-left)); margin-right:calc(-1 * var(--safe-right));
+    padding-left:var(--safe-left); padding-right:var(--safe-right);
+    scrollbar-width:none;
+  }
+  .stats::-webkit-scrollbar{display:none}
+  .stat{
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:14px 16px; flex:0 0 auto; min-width:140px; scroll-snap-align:start;
+  }
+  .stat .label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; white-space:nowrap}
+  .stat .value{font-size:20px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap}
+  .stat .value.green{color:var(--green)}
+  .stat .value.red{color:var(--red)}
+
+  /* --- Toolbar --- */
+  .toolbar{display:flex; flex-direction:column; gap:10px; margin-bottom:16px}
+  .toolbar-row{display:flex; gap:8px}
+  .toolbar-row input{flex:1}
+  .toolbar-row select{flex:1; min-width:0}
+  .toolbar-actions{display:flex; gap:8px}
+  .toolbar-actions button{flex:1; font-size:14px}
+
+  /* --- Grid --- */
+  .grid{display:grid; grid-template-columns:1fr; gap:12px}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:16px; display:flex; flex-direction:column; gap:12px;
+    transition:border-color .15s;
+  }
+  .card:active{border-color:#3d4454}
+  .card-head{display:flex; justify-content:space-between; gap:10px; align-items:flex-start}
+  .card-title{font-size:16px; font-weight:600; word-break:break-word; line-height:1.35}
+  .card-cat{display:inline-block; font-size:11px; color:var(--accent); background:rgba(79,140,255,.12); padding:3px 9px; border-radius:6px; margin-top:8px; font-weight:500}
+  .card-btns{display:flex; gap:4px; flex-shrink:0}
+  .icon-btn{
+    background:transparent; border:none; padding:0; font-size:18px; opacity:.65;
+    border-radius:10px; width:44px; height:44px; min-height:44px; display:flex;
+    align-items:center; justify-content:center;
+  }
+  .icon-btn:active{opacity:1; background:var(--bg2); transform:scale(.9)}
+
+  .calc-row{display:flex; justify-content:space-between; font-size:13.5px; padding:3px 0; gap:12px}
+  .calc-row .k{color:var(--muted); flex-shrink:0}
+  .calc-row .v{font-variant-numeric:tabular-nums; text-align:right}
+  .divider{border-top:1px dashed var(--border); margin:8px 0}
+
+  .profit-block{background:var(--bg2); border-radius:12px; padding:14px; margin-top:4px}
+  .profit-main{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; gap:12px}
+  .profit-main .label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; font-weight:500}
+  .profit-main .val{font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap}
+  .profit-sub{display:flex; gap:16px; font-size:12.5px; color:var(--muted); flex-wrap:wrap}
+  .profit-sub b{color:var(--text); font-weight:600}
+
+  .pos{color:var(--green)} .neg{color:var(--red)} .warn{color:var(--yellow)}
+
+  .card-links{display:flex; gap:8px; margin-top:4px}
+  .card-links a{
+    flex:1; text-align:center; padding:11px 8px; font-size:13px; color:var(--muted);
+    border:1px solid var(--border); border-radius:10px; text-decoration:none;
+    min-height:44px; display:flex; align-items:center; justify-content:center; gap:4px;
+    transition:background .15s, border-color .15s, color .15s;
+  }
+  .card-links a:active{background:var(--bg2); color:var(--accent); border-color:var(--accent)}
+
+  .empty{
+    text-align:center; padding:60px 20px; color:var(--muted);
+    border:1px dashed var(--border); border-radius:14px; font-size:15px;
+  }
+  .empty h3{color:var(--text); font-size:17px; margin-bottom:8px}
+
+  /* --- FAB (floating action button) --- */
+  .fab{
+    position:fixed; right:calc(20px + var(--safe-right));
+    bottom:calc(20px + var(--safe-bottom));
+    width:60px; height:60px; border-radius:50%; padding:0; min-height:60px;
+    background:var(--accent); border:none; color:#fff; font-size:32px; font-weight:300;
+    box-shadow:0 8px 24px rgba(79,140,255,.45), 0 2px 8px rgba(0,0,0,.4);
+    z-index:50; display:flex; align-items:center; justify-content:center;
+    transition:transform .15s, box-shadow .15s;
+  }
+  .fab:active{transform:scale(.92); box-shadow:0 4px 12px rgba(79,140,255,.5)}
+  /* Hide top "add" button on mobile, FAB replaces it */
+  #addBtn{display:none}
+
+  /* --- Modals as bottom sheets on mobile --- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.6);
+    display:none; align-items:flex-end; justify-content:center;
+    z-index:100; padding:0;
+    -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
+  }
+  .overlay.open{display:flex; animation:fade .2s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .modal{
+    background:var(--card); border:1px solid var(--border);
+    border-radius:20px 20px 0 0; padding:20px 20px calc(20px + var(--safe-bottom)) 20px;
+    width:100%; max-width:100%; max-height:92vh; overflow-y:auto;
+    animation:slideUp .28s cubic-bezier(.32,.72,0,1);
+    -webkit-overflow-scrolling:touch;
+  }
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .modal::before{
+    content:''; display:block; width:40px; height:4px; background:var(--border);
+    border-radius:2px; margin:-8px auto 16px;
+  }
+  .modal h2{font-size:18px; margin-bottom:16px}
+  .form-row{margin-bottom:14px}
+  .form-2col{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  .modal-actions{
+    display:flex; gap:10px; justify-content:stretch; margin-top:20px;
+    flex-direction:column-reverse;
+  }
+  .modal-actions button{flex:1; padding:14px; font-size:15px}
+  .modal-actions .cancel-group{display:flex; gap:10px}
+  .hint{font-size:12px; color:var(--muted); margin-top:6px; line-height:1.4}
+
+  /* --- Toast: above FAB --- */
+  .toast{
+    position:fixed; left:50%; transform:translateX(-50%) translateY(20px);
+    bottom:calc(96px + var(--safe-bottom));
+    background:var(--card); border:1px solid var(--border); padding:12px 20px;
+    border-radius:12px; opacity:0; pointer-events:none; transition:.25s; z-index:200;
+    font-size:14px; font-weight:500; max-width:calc(100vw - 40px);
+    box-shadow:0 8px 24px rgba(0,0,0,.4);
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+  .toast.ok{border-color:var(--green)}
+  .toast.err{border-color:var(--red)}
+
+  /* ============================================ */
+  /* --- TABLET & DESKTOP overrides ---          */
+  /* ============================================ */
+  @media (min-width:640px){
+    body{padding: calc(24px + var(--safe-top)) calc(24px + var(--safe-right))
+                  calc(24px + var(--safe-bottom)) calc(24px + var(--safe-left))}
+    .topbar{margin-bottom:24px}
+    .brand h1{font-size:22px}
+    .logo{font-size:32px}
+    #settingsBtn span{display:inline}
+    #addBtn{display:inline-flex}
+    .fab{display:none}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px}
+    .stats{
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      overflow:visible; margin-left:0; margin-right:0; padding-left:0; padding-right:0;
+    }
+    .stat{min-width:0}
+    .toolbar{flex-direction:row; align-items:center; flex-wrap:wrap}
+    .toolbar-row{flex:1; min-width:0}
+    .toolbar-actions{flex:0 0 auto}
+    .toolbar-actions button{flex:0 0 auto}
+    .overlay{align-items:center; padding:20px}
+    .modal{
+      border-radius:16px; padding:24px; max-width:520px;
+      animation:pop .2s ease;
+    }
+    .modal::before{display:none}
+    @keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+    .modal-actions{flex-direction:row; justify-content:flex-end}
+    .modal-actions button{flex:0 0 auto; padding:10px 18px}
+    .modal-actions .cancel-group{display:contents}
+    .toast{bottom:24px}
+    button:active{transform:none; background:var(--bg2)}
+    button.primary:active{background:var(--accent2)}
+    .card:active{border-color:var(--border)}
+    .icon-btn:active{transform:none; background:transparent}
+    .card-links a:active{background:transparent; color:var(--muted); border-color:var(--border)}
+    .fab:active{transform:none}
+  }
+
+  /* Desktop hover only on hover-capable devices */
+  @media (hover:hover) and (pointer:fine){
+    button:hover{background:var(--card); border-color:#3d4454}
+    button.primary:hover{background:var(--accent2)}
+    button.danger:hover{border-color:var(--red)}
+    .icon-btn:hover{opacity:1; background:var(--bg2)}
+    .card:hover{border-color:#3d4454; box-shadow:0 8px 24px rgba(0,0,0,.3)}
+    .card-links a:hover{color:var(--accent); border-color:var(--accent)}
+    .fab:hover{transform:translateY(-2px); box-shadow:0 12px 28px rgba(79,140,255,.5)}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">📦</div>
+    <div>
+      <h1>ChinaTrack</h1>
+      <p>трекер закупок и маржи</p>
+    </div>
+  </div>
+  <div class="actions">
+    <button id="settingsBtn">⚙️<span> Настройки</span></button>
+    <button id="addBtn" class="primary">+ Добавить товар</button>
+  </div>
+</header>
+
+<section class="stats">
+  <div class="stat"><div class="label">Товаров</div><div class="value" id="statCount">0</div></div>
+  <div class="stat"><div class="label">Средняя маржа</div><div class="value" id="statMargin">—</div></div>
+  <div class="stat"><div class="label">Средний ROI</div><div class="value" id="statRoi">—</div></div>
+  <div class="stat"><div class="label">Закупка (MOQ)</div><div class="value" id="statInvest">0 ₽</div></div>
+</section>
+
+<section class="toolbar">
+  <div class="toolbar-row">
+    <input id="search" type="search" placeholder="🔍 Поиск...">
+  </div>
+  <div class="toolbar-row">
+    <select id="categoryFilter"><option value="all">Все категории</option></select>
+    <select id="sort">
+      <option value="created">Сначала новые</option>
+      <option value="margin">Маржа ↓</option>
+      <option value="profit">Прибыль ↓</option>
+      <option value="roi">ROI ↓</option>
+      <option value="name">По названию</option>
+    </select>
+  </div>
+  <div class="toolbar-actions">
+    <button id="exportBtn">⬇ Экспорт</button>
+    <button id="importBtn">⬆ Импорт</button>
+    <input type="file" id="fileInput" accept=".json" hidden>
+  </div>
+</section>
+
+<section id="grid" class="grid"></section>
+<div id="empty" class="empty">
+  <h3>Пока пусто</h3>
+  <p>Нажмите «+», чтобы добавить первую связку 1688 → маркетплейс.</p>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fabAdd" aria-label="Добавить товар">+</button>
+
+<!-- Product modal -->
+<div class="overlay" id="productOverlay">
+  <div class="modal">
+    <h2 id="productModalTitle">Новый товар</h2>
+    <input type="hidden" id="f_id">
+    <div class="form-row">
+      <label>Название *</label>
+      <input id="f_name" placeholder="USB-перчатки с подогревом" autocomplete="off">
+    </div>
+    <div class="form-2col">
+      <div class="form-row">
+        <label>Категория</label>
+        <input id="f_category" placeholder="Зимние аксессуары" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <label>MOQ, шт</label>
+        <input id="f_moq" type="number" inputmode="numeric" min="0" step="1" placeholder="100">
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Ссылка на 1688 / Taobao</label>
+      <input id="f_url1688" type="url" inputmode="url" placeholder="https://detail.1688.com/..." autocomplete="off">
+    </div>
+    <div class="form-row">
+      <label>Ссылка на маркетплейс</label>
+      <input id="f_urlMp" type="url" inputmode="url" placeholder="https://www.ozon.ru/..." autocomplete="off">
+    </div>
+    <div class="form-2col">
+      <div class="form-row">
+        <label>Закупка, ¥ *</label>
+        <input id="f_priceCny" type="number" inputmode="decimal" min="0" step="0.01" placeholder="55">
+      </div>
+      <div class="form-row">
+        <label>Продажа, ₽ *</label>
+        <input id="f_salePrice" type="number" inputmode="decimal" min="0" step="0.01" placeholder="1990">
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Заметки</label>
+      <textarea id="f_notes" rows="2" placeholder="Рейтинг поставщика, нюансы..." autocomplete="off"></textarea>
+    </div>
+    <div class="modal-actions">
+      <div class="cancel-group">
+        <button onclick="closeModal('product')">Отмена</button>
+      </div>
+      <button class="primary" onclick="saveProduct()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings modal -->
+<div class="overlay" id="settingsOverlay">
+  <div class="modal">
+    <h2>Настройки расчёта</h2>
+    <div class="form-2col">
+      <div class="form-row">
+        <label>Курс ¥ → ₽</label>
+        <input id="s_rate" type="number" inputmode="decimal" min="0" step="0.01">
+      </div>
+      <div class="form-row">
+        <label>Комиссия МП, %</label>
+        <input id="s_commission" type="number" inputmode="decimal" min="0" step="0.1">
+      </div>
+    </div>
+    <div class="form-2col">
+      <div class="form-row">
+        <label>Эквайринг, %</label>
+        <input id="s_acquiring" type="number" inputmode="decimal" min="0" step="0.1">
+      </div>
+      <div class="form-row">
+        <label>Логистика, ₽/шт</label>
+        <input id="s_logistics" type="number" inputmode="numeric" min="0" step="1">
+      </div>
+    </div>
+    <p class="hint">Логистика — усреднённая доставка одной единицы до склада МП. Комиссия — категорийная ставка маркетплейса.</p>
+    <div class="modal-actions">
+      <div class="cancel-group">
+        <button class="danger" onclick="resetData()">Очистить</button>
+        <button onclick="closeModal('settings')">Отмена</button>
+      </div>
+      <button class="primary" onclick="saveSettings()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DEFAULT_SETTINGS = { rate: 11.8, commission: 19, acquiring: 1.5, logistics: 300 };
+const LS_PRODUCTS = 'chinatrack_products_v1';
+const LS_SETTINGS = 'chinatrack_settings_v1';
+
+const state = { products: [], settings: { ...DEFAULT_SETTINGS }, search: '', category: 'all', sort: 'created' };
+
+const $ = id => document.getElementById(id);
+const fmtRub = n => new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(Math.round(n || 0)) + ' ₽';
+const fmtPct = n => (n || 0).toFixed(1) + '%';
+const fmtCny = n => '¥' + new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(n || 0);
+const esc = s => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function calc(p) {
+  const s = state.settings;
+  const purchaseRub = (Number(p.priceCny) || 0) * (s.rate || 0);
+  const logistics = Number(s.logistics) || 0;
+  const sale = Number(p.salePrice) || 0;
+  const commission = sale * (s.commission || 0) / 100;
+  const acquiring = sale * (s.acquiring || 0) / 100;
+  const costs = purchaseRub + logistics + commission + acquiring;
+  const profit = sale - costs;
+  const margin = sale > 0 ? (profit / sale * 100) : 0;
+  const roi = (purchaseRub + logistics) > 0 ? (profit / (purchaseRub + logistics) * 100) : 0;
+  return { purchaseRub, logistics, sale, commission, acquiring, costs, profit, margin, roi };
+}
+
+function toast(msg, type = 'ok') {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = 'toast ' + type, 2200);
+}
+
+function load() {
+  try {
+    const p = JSON.parse(localStorage.getItem(LS_PRODUCTS) || '[]');
+    const s = JSON.parse(localStorage.getItem(LS_SETTINGS) || 'null');
+    state.products = Array.isArray(p) ? p : [];
+    state.settings = s ? { ...DEFAULT_SETTINGS, ...s } : { ...DEFAULT_SETTINGS };
+  } catch (e) { console.error(e); }
+}
+
+function save() {
+  localStorage.setItem(LS_PRODUCTS, JSON.stringify(state.products));
+  localStorage.setItem(LS_SETTINGS, JSON.stringify(state.settings));
+}
+
+function render() {
+  const grid = $('grid');
+  const empty = $('empty');
+
+  let list = state.products.slice();
+  if (state.search) {
+    const q = state.search.toLowerCase();
+    list = list.filter(p => (p.name || '').toLowerCase().includes(q) || (p.category || '').toLowerCase().includes(q));
+  }
+  if (state.category !== 'all') list = list.filter(p => (p.category || '') === state.category);
+
+  const withCalc = list.map(p => ({ ...p, _c: calc(p) }));
+  const sorters = {
+    created: (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
+    margin: (a, b) => b._c.margin - a._c.margin,
+    profit: (a, b) => b._c.profit - a._c.profit,
+    roi: (a, b) => b._c.roi - a._c.roi,
+    name: (a, b) => (a.name || '').localeCompare(b.name || '', 'ru')
+  };
+  withCalc.sort(sorters[state.sort] || sorters.created);
+
+  const cats = [...new Set(state.products.map(p => p.category).filter(Boolean))].sort();
+  const catSel = $('categoryFilter');
+  catSel.innerHTML = '<option value="all">Все категории</option>' +
+    cats.map(c => `<option value="${esc(c)}"${state.category === c ? ' selected' : ''}>${esc(c)}</option>`).join('');
+
+  if (withCalc.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    grid.innerHTML = withCalc.map(renderCard).join('');
+  }
+  renderStats();
+}
+
+function renderCard(p) {
+  const c = p._c;
+  const profitClass = c.profit >= 0 ? 'pos' : 'neg';
+  const marginClass = c.margin >= 25 ? 'pos' : c.margin >= 10 ? 'warn' : 'neg';
+  const moqInvest = (Number(p.priceCny) || 0) * (Number(p.moq) || 0) * state.settings.rate;
+
+  const links = [];
+  if (p.url1688) links.push(`<a href="${esc(p.url1688)}" target="_blank" rel="noopener">🔗 1688</a>`);
+  if (p.urlMp) links.push(`<a href="${esc(p.urlMp)}" target="_blank" rel="noopener">🛒 МП</a>`);
+
+  return `
+  <div class="card">
+    <div class="card-head">
+      <div style="min-width:0">
+        <div class="card-title">${esc(p.name || 'Без названия')}</div>
+        ${p.category ? `<span class="card-cat">${esc(p.category)}</span>` : ''}
+      </div>
+      <div class="card-btns">
+        <button class="icon-btn" onclick="editProduct('${p.id}')" aria-label="Редактировать">✏️</button>
+        <button class="icon-btn" onclick="deleteProduct('${p.id}')" aria-label="Удалить">🗑️</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="calc-row"><span class="k">Закупка</span><span class="v">${fmtCny(p.priceCny)} → ${fmtRub(c.purchaseRub)}</span></div>
+      <div class="calc-row"><span class="k">Логистика</span><span class="v">${fmtRub(c.logistics)}</span></div>
+      <div class="calc-row"><span class="k">Комиссия МП</span><span class="v">${fmtRub(c.commission)}</span></div>
+      <div class="calc-row"><span class="k">Эквайринг</span><span class="v">${fmtRub(c.acquiring)}</span></div>
+      <div class="divider"></div>
+      <div class="calc-row"><span class="k">Цена продажи</span><span class="v"><b>${fmtRub(c.sale)}</b></span></div>
+    </div>
+
+    <div class="profit-block">
+      <div class="profit-main">
+        <span class="label">Прибыль / шт</span>
+        <span class="val ${profitClass}">${fmtRub(c.profit)}</span>
+      </div>
+      <div class="profit-sub">
+        <span>Маржа: <b class="${marginClass}">${fmtPct(c.margin)}</b></span>
+        <span>ROI: <b class="${profitClass}">${fmtPct(c.roi)}</b></span>
+      </div>
+      ${p.moq ? `<div class="profit-sub" style="margin-top:8px"><span>Партия ${p.moq} шт: <b>${fmtRub(moqInvest)}</b></span></div>` : ''}
+    </div>
+
+    ${links.length ? `<div class="card-links">${links.join('')}</div>` : ''}
+    ${p.notes ? `<div style="font-size:12.5px;color:var(--muted)">📝 ${esc(p.notes)}</div>` : ''}
+  </div>`;
+}
+
+function renderStats() {
+  const n = state.products.length;
+  $('statCount').textContent = n;
+  if (n === 0) {
+    $('statMargin').textContent = '—'; $('statMargin').className = 'value';
+    $('statRoi').textContent = '—';   $('statRoi').className = 'value';
+    $('statInvest').textContent = '0 ₽';
+    return;
+  }
+  const calcs = state.products.map(calc);
+  const avgMargin = calcs.reduce((s, c) => s + c.margin, 0) / n;
+  const avgRoi = calcs.reduce((s, c) => s + c.roi, 0) / n;
+  const invest = state.products.reduce((s, p) =>
+    s + (Number(p.priceCny) || 0) * (Number(p.moq) || 0) * state.settings.rate, 0);
+  $('statMargin').textContent = fmtPct(avgMargin);
+  $('statMargin').className = 'value ' + (avgMargin >= 25 ? 'green' : avgMargin >= 10 ? '' : 'red');
+  $('statRoi').textContent = fmtPct(avgRoi);
+  $('statRoi').className = 'value ' + (avgRoi >= 50 ? 'green' : avgRoi >= 0 ? '' : 'red');
+  $('statInvest').textContent = fmtRub(invest);
+}
+
+function openModal(w) { $(w + 'Overlay').classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeModal(w) {
+  $(w + 'Overlay').classList.remove('open');
+  if (!document.querySelector('.overlay.open')) document.body.style.overflow = '';
+}
+
+function openProductModal(product = null) {
+  $('productModalTitle').textContent = product ? 'Редактировать' : 'Новый товар';
+  $('f_id').value = product ? product.id : '';
+  $('f_name').value = product?.name || '';
+  $('f_category').value = product?.category || '';
+  $('f_moq').value = product?.moq ?? '';
+  $('f_url1688').value = product?.url1688 || '';
+  $('f_urlMp').value = product?.urlMp || '';
+  $('f_priceCny').value = product?.priceCny ?? '';
+  $('f_salePrice').value = product?.salePrice ?? '';
+  $('f_notes').value = product?.notes || '';
+  openModal('product');
+  setTimeout(() => { if (window.innerWidth > 640) $('f_name').focus(); }, 100);
+}
+
+function saveProduct() {
+  const name = $('f_name').value.trim();
+  const priceCny = parseFloat($('f_priceCny').value);
+  const salePrice = parseFloat($('f_salePrice').value);
+  if (!name) return toast('Введите название', 'err');
+  if (isNaN(priceCny) || priceCny < 0) return toast('Некорректная цена закупки', 'err');
+  if (isNaN(salePrice) || salePrice < 0) return toast('Некорректная цена продажи', 'err');
+
+  const id = $('f_id').value;
+  const data = {
+    name,
+    category: $('f_category').value.trim(),
+    moq: parseFloat($('f_moq').value) || 0,
+    url1688: $('f_url1688').value.trim(),
+    urlMp: $('f_urlMp').value.trim(),
+    priceCny, salePrice,
+    notes: $('f_notes').value.trim()
+  };
+
+  if (id) {
+    const idx = state.products.findIndex(p => p.id === id);
+    if (idx >= 0) state.products[idx] = { ...state.products[idx], ...data, updatedAt: Date.now() };
+    toast('Обновлено');
+  } else {
+    state.products.push({ id: crypto.randomUUID(), ...data, createdAt: Date.now() });
+    toast('Добавлено');
+  }
+  save(); closeModal('product'); render();
+}
+
+function editProduct(id) {
+  const p = state.products.find(x => x.id === id);
+  if (p) openProductModal(p);
+}
+
+function deleteProduct(id) {
+  const p = state.products.find(x => x.id === id);
+  if (!p) return;
+  if (!confirm(`Удалить «${p.name}»?`)) return;
+  state.products = state.products.filter(x => x.id !== id);
+  save(); render(); toast('Удалено');
+}
+
+function openSettings() {
+  $('s_rate').value = state.settings.rate;
+  $('s_commission').value = state.settings.commission;
+  $('s_acquiring').value = state.settings.acquiring;
+  $('s_logistics').value = state.settings.logistics;
+  openModal('settings');
+}
+
+function saveSettings() {
+  state.settings = {
+    rate: parseFloat($('s_rate').value) || 0,
+    commission: parseFloat($('s_commission').value) || 0,
+    acquiring: parseFloat($('s_acquiring').value) || 0,
+    logistics: parseFloat($('s_logistics').value) || 0
+  };
+  save(); closeModal('settings'); render(); toast('Сохранено');
+}
+
+function resetData() {
+  if (!confirm('Удалить ВСЕ товары и настройки?')) return;
+  localStorage.removeItem(LS_PRODUCTS);
+  localStorage.removeItem(LS_SETTINGS);
+  state.products = [];
+  state.settings = { ...DEFAULT_SETTINGS };
+  closeModal('settings'); render(); toast('Очищено');
+}
+
+function exportJSON() {
+  const data = { products: state.products, settings: state.settings, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `chinatrack-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Экспортировано');
+}
+
+function importJSON(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data.products)) throw new Error('Нет массива products');
+      if (!confirm(`Импортировать ${data.products.length} товаров? Текущие данные будут заменены.`)) return;
+      state.products = data.products;
+      if (data.settings) state.settings = { ...DEFAULT_SETTINGS, ...data.settings };
+      save(); render(); toast(`Импортировано: ${data.products.length}`);
+    } catch (err) { toast('Ошибка: ' + err.message, 'err'); }
+  };
+  reader.readAsText(file);
+}
+
+$('addBtn').onclick = () => openProductModal();
+$('fabAdd').onclick = () => openProductModal();
+$('settingsBtn').onclick = openSettings;
+$('exportBtn').onclick = exportJSON;
+$('importBtn').onclick = () => $('fileInput').click();
+$('fileInput').onchange = e => { if (e.target.files[0]) importJSON(e.target.files[0]); e.target.value = ''; };
+
+$('search').oninput = e => { state.search = e.target.value; render(); };
+$('categoryFilter').onchange = e => { state.category = e.target.value; render(); };
+$('sort').onchange = e => { state.sort = e.target.value; render(); };
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal('product'); closeModal('settings'); }
+});
+document.querySelectorAll('.overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+// Prevent iOS rubber-band on inputs
+document.addEventListener('touchmove', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') e.stopPropagation();
+}, { passive: true });
+
+load();
+render();
+</script>
+</body>
+</html>
